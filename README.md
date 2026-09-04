@@ -20,47 +20,7 @@ Payment failures silently drain revenue. A naive "blind retry" system recovers r
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        React Frontend                        │
-│  ┌────────────────┐  ┌────────────────────────────────────┐ │
-│  │   Playground   │  │           Dashboard                │ │
-│  │  Side-by-side  │  │  Metrics · Learning Curve · Feed   │ │
-│  │  live demo     │  │  Bandit Matrix · Transaction Ledger│ │
-│  └───────┬────────┘  └──────────────┬─────────────────────┘ │
-└──────────┼───────────────────────────┼──────────────────────┘
-           │ REST + Socket.io           │ REST + Socket.io
-┌──────────▼───────────────────────────▼──────────────────────┐
-│                     Express.js Server                        │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              3-Layer Pipeline                         │   │
-│  │                                                       │   │
-│  │  Layer 1: riskScorer.js → actionPicker.js            │   │
-│  │  Layer 2: classifier.js → bandit.js → executor.js    │   │
-│  │           → restraintGate.js                         │   │
-│  │  Layer 3: bandit.js (updateBanditOutcome)            │   │
-│  │           → ruleUpdater.js (scanAndUpdateRules)      │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │  Razorpay    │  │  Simulation  │  │   Socket.io      │  │
-│  │  API Routes  │  │  batchRunner │  │   Real-time feed │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────────────────┘  │
-└─────────┼─────────────────┼────────────────────────────────┘
-          │                 │
-┌─────────▼─────────────────▼────────────────────────────────┐
-│                      MongoDB Atlas                           │
-│  transactions · auditlogentries · banditstates              │
-│  riskrules · customers · razorpayevents                     │
-└─────────────────────────────────────────────────────────────┘
-          │
-┌─────────▼───────────────────────────────────────────────────┐
-│               Razorpay Test-Mode APIs                        │
-│  Orders API · Payments API · Payment Links API              │
-│  Subscriptions API · Webhooks                               │
-└─────────────────────────────────────────────────────────────┘
-```
+![System Architecture](./client/src/images/architecture.png)
 
 ---
 
