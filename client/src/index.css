@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#F7F8FA] text-[#1A2332] font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'tnum';
+  }
+
+  code, pre, .font-mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: 'tnum';
+  }
+}
+
+/* Custom minimal scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F8FA;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

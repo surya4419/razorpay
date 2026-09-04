@@ -1,0 +1,26 @@
+{
+  "name": "razorpay-ai-revenue-recovery",
+  "version": "1.0.0",
+  "description": "AI Revenue Recovery Engine — Razorpay Buildathon 2026 Track 03",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "start": "cd server && npm start",
+    "build": "cd client && npm run build",
+    "test": "cd server && npm test",
+    "test:razorpay": "cd server && npm run test:razorpay"
+  },
+  "keywords": [
+    "razorpay",
+    "revenue-recovery",
+    "mern",
+    "contextual-bandit",
+    "fintech"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
