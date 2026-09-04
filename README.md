@@ -1,6 +1,6 @@
-# AI Revenue Recovery Engine
+# ⚡ Jolt — AI Revenue Recovery Engine
 
-> Stop losing revenue to payment failures. Recover smarter, not harder.
+> Revenue, revived.
 
 A full-stack intelligence system that prevents and recovers failed payments using a 3-layer AI pipeline — built on top of real Razorpay APIs in test mode.
 
@@ -257,4 +257,4 @@ Over-recovery (spamming customers, force-retrying hard declines) actually loses 
 
 ---
 
-> © 2026 AI Recovery Agent · Stop losing revenue to payment failures. Recover smarter, not harder.
+> ⚡ **Jolt** · Revenue, revived. · © 2026 Jolt

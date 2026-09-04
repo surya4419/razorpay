@@ -36,7 +36,13 @@ export function App() {
 
       {/* Quiet Footer */}
       <footer className="border-t border-[#E2E5EB] bg-white py-4 text-center text-xs text-[#6B7280] font-sans">
-        Stop losing revenue to payment failures — recover smarter, not harder. &nbsp;·&nbsp; © 2026 AI Recovery Agent
+        <span className="inline-flex items-center gap-1.5 justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12">
+            <path fill="#2d5bff" d="M13 2 L3 14 h7 l-1 8 L21 10 h-7 Z"/>
+          </svg>
+          <strong style={{ color: '#0A1F3D' }}>Jolt</strong>
+          &nbsp;·&nbsp; Revenue, revived. &nbsp;·&nbsp; © 2026 Jolt
+        </span>
       </footer>
     </div>
   );

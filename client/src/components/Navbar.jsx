@@ -1,11 +1,4 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
-
-/**
- * Shares tokens with CardExpiryModal:
- * Ink #0A1F3D · Primary #2B5FE0 · Primary-D #1E46B3
- * Surface (light) #EAF2FE · Radius scale: 28 / 18 / 12
- */
 
 export function Navbar({ activeTab, onTabChange, config }) {
   return (
@@ -20,18 +13,12 @@ export function Navbar({ activeTab, onTabChange, config }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-[10px] flex items-center justify-center flex-shrink-0"
-              style={{
-                background: 'linear-gradient(160deg, #3B6FE8 0%, #2B5FE0 100%)',
-                boxShadow: '0 1px 0 rgba(255,255,255,0.2) inset, 0 4px 10px -3px rgba(43,95,224,0.4)',
-              }}
-            >
-              <Shield className="w-4 h-4 text-white" strokeWidth={2.4} />
-            </div>
-            <span className="font-semibold tracking-tight text-[15px]" style={{ color: '#0A1F3D' }}>
-              AI Revenue Recovery Engine
+          <div className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
+              <path fill="#2d5bff" d="M13 2 L3 14 h7 l-1 8 L21 10 h-7 Z"/>
+            </svg>
+            <span className="font-bold tracking-tight text-[16px]" style={{ color: '#0A1F3D' }}>
+              Jolt
             </span>
           </div>
 
