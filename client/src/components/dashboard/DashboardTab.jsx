@@ -17,7 +17,7 @@ export function DashboardTab() {
   const [transactionsData, setTransactionsData] = useState({ transactions: [], total: 0 });
   const [page, setPage] = useState(1);
   const [filterRealOnly, setFilterRealOnly] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('prevented');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
   const [isSimulating, setIsSimulating] = useState(false);

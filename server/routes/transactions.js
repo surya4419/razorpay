@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
     const skip = (Number(page) - 1) * Number(limit);
     const [transactions, total] = await Promise.all([
       Transaction.find(query)
-        .sort({ createdAt: -1 })
+        .sort({ isRealRazorpayCall: -1, createdAt: -1 })
         .skip(skip)
         .limit(Number(limit)),
       Transaction.countDocuments(query)
