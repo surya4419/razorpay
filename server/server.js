@@ -59,8 +59,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    razorpayConfigured: config.isRealRazorpayConfigured,
-    keyId: config.razorpayKeyId
+    razorpayConfigured: config.isRealRazorpayConfigured
   });
 });
 
@@ -80,8 +79,7 @@ async function startServer() {
 
     httpServer.listen(config.port, () => {
       console.log(`AI Revenue Recovery Server running on port ${config.port}`);
-      console.log(`REST endpoints: http://localhost:${config.port}/api`);
-      console.log(`Razorpay Key ID configured: ${config.razorpayKeyId}`);
+      console.log(`Razorpay configured: ${config.isRealRazorpayConfigured ? 'yes' : 'no (placeholder keys)'}`);
     });
   } catch (err) {
     console.error('Failed to start server:', err);
