@@ -12,24 +12,6 @@ import img6 from '../../images/6.png';
 export const SCENARIOS = [
   // ── PREVENTION (Layer 1 changes the outcome before any failure occurs) ────
   {
-    id: 'emandate_above_15k',
-    name: 'E-mandate > ₹15,000',
-    category: 'Regulatory AFA',
-    type: 'prevention',
-    demonstrates: 'RBI AFA threshold → proactive OTP authentication before charge',
-    amount: 18000,
-    method: 'subscription',
-    transactionType: 'recurring',
-    testInstrument: 'AutoPay Mandate (₹18,000)',
-    testInstrumentLeft: null,
-    testInstrumentRight: null,
-    testInstrumentNote: null,
-    expectedReason: 'mandate_max_amount_exceeded',
-    icon: ShieldAlert,
-    image: img1,
-    description: 'RBI mandates fresh OTP/AFA for recurring charges > ₹15,000. Left: blind charge attempt → instant rejection. Right: AFA collected upfront → charge authorised.'
-  },
-  {
     id: 'payment_timed_out',
     name: 'Slow network / Timeout',
     category: 'Infra failure',
@@ -50,24 +32,6 @@ export const SCENARIOS = [
     description: 'Peak-hour slow network detected. Left: 3:00 session → timed out, lost. Right: Layer 1 extends to 5:00 → customer completes before bank gateway drops.'
   },
   {
-    id: 'expiring_saved_card',
-    name: 'Expiring saved card',
-    category: 'Token expiry',
-    type: 'prevention',
-    demonstrates: 'Stored token expiry check → proactive card update before checkout',
-    amount: 6800,
-    method: 'card',
-    transactionType: 'one-off',
-    testInstrument: 'Left: 5555 5100 0008 1006 (past expiry). Right: 5555 5100 0008 1006 (updated)',
-    testInstrumentLeft: '5555 5100 0008 1006 (past expiry, e.g. 01/23)',
-    testInstrumentRight: '5555 5100 0008 1006',
-    testInstrumentNote: 'Left: 5555 5100 0008 1006 with past expiry. Right: 5555 5100 0008 1006 with valid expiry',
-    expectedReason: 'card_expired',
-    icon: RefreshCw,
-    image: img3,
-    description: 'Returning customer\'s saved card expires this month. Left: checkout blindly opens → card fails at bank. Right: Layer 1 flags expiry before Checkout even opens, prompts update → success on first attempt.'
-  },
-  {
     id: 'high_risk_new_device',
     name: 'High-risk new device',
     category: 'Fraud signal',
@@ -84,6 +48,42 @@ export const SCENARIOS = [
     icon: Cpu,
     image: img4,
     description: 'New device + ₹24,000 = high issuing-bank fraud-score profile on card. Left: card-first → bank declines. Right: risk scorer routes to Wallet/UPI first → frictionless capture.'
+  },
+  {
+    id: 'emandate_above_15k',
+    name: 'E-mandate > ₹15,000',
+    category: 'Regulatory AFA',
+    type: 'prevention',
+    demonstrates: 'RBI AFA threshold → proactive OTP authentication before charge',
+    amount: 18000,
+    method: 'subscription',
+    transactionType: 'recurring',
+    testInstrument: 'AutoPay Mandate (₹18,000)',
+    testInstrumentLeft: null,
+    testInstrumentRight: null,
+    testInstrumentNote: null,
+    expectedReason: 'mandate_max_amount_exceeded',
+    icon: ShieldAlert,
+    image: img1,
+    description: 'RBI mandates fresh OTP/AFA for recurring charges > ₹15,000. Left: blind charge attempt → instant rejection. Right: AFA collected upfront → charge authorised.'
+  },
+  {
+    id: 'expiring_saved_card',
+    name: 'Expiring saved card',
+    category: 'Token expiry',
+    type: 'prevention',
+    demonstrates: 'Stored token expiry check → proactive card update before checkout',
+    amount: 6800,
+    method: 'card',
+    transactionType: 'one-off',
+    testInstrument: 'Left: 5555 5100 0008 1006 (past expiry). Right: 5555 5100 0008 1006 (updated)',
+    testInstrumentLeft: '5555 5100 0008 1006 (past expiry, e.g. 01/23)',
+    testInstrumentRight: '4100 2800 0000 1007',
+    testInstrumentNote: 'Left: 5555 5100 0008 1006 with past expiry. Right: 4100 2800 0000 1007 with valid expiry',
+    expectedReason: 'card_expired',
+    icon: RefreshCw,
+    image: img3,
+    description: 'Returning customer\'s saved card expires this month. Left: checkout blindly opens → card fails at bank. Right: Layer 1 flags expiry before Checkout even opens, prompts update → success on first attempt.'
   },
 
   // ── RECOVERY (Layer 2+3 chase money back after failure) ───────────────────
@@ -140,33 +140,48 @@ export const SCENARIOS = [
 const CARD_SHADOW = '0 1px 1px rgba(10,31,77,0.03), 0 10px 24px -14px rgba(10,31,77,0.22)';
 
 // ─── Component ───────────────────────────────────────────────────────────────
-export function ScenarioPicker({ selectedScenario, onSelectScenario, onRunDemo, isRunning, hideRunButton }) {
+export function ScenarioPicker({ selectedScenario, onSelectScenario, onRunDemo, isRunning, hideRunButton, flat }) {
   const preventionScenarios = SCENARIOS.filter(s => s.type === 'prevention');
   const recoveryScenarios = SCENARIOS.filter(s => s.type === 'recovery');
 
+  // Default active tab to whichever type the selected scenario belongs to
+  const [activeTab, setActiveTab] = React.useState(
+    selectedScenario?.type === 'recovery' ? 'recovery' : 'prevention'
+  );
+
+  const visibleScenarios = activeTab === 'prevention' ? preventionScenarios : recoveryScenarios;
+
   return (
-    <div
-      className="rounded-[20px] bg-white overflow-hidden"
-      style={{ border: '1px solid #E3E8F0', boxShadow: CARD_SHADOW }}
-    >
-      {/* Header */}
-      <div
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-5"
-        style={{ borderBottom: '1px solid #E3E8F0' }}
-      >
-        <div>
-          <h2 className="text-base font-semibold" style={{ color: '#0A1F3D' }}>
-            Select live test scenario
-          </h2>
-          <p className="text-xs mt-0.5" style={{ color: '#5B6B84' }}>
-            4 prevention scenarios (Layer 1 changes the outcome) + 2 recovery scenarios (Layer 2+3 classifies & recovers)
-          </p>
+    <div>
+      {/* Header + Tabs inline */}
+      <div className="flex items-center gap-4 mb-5">
+        <h2 className="text-sm font-semibold whitespace-nowrap" style={{ color: '#0A1F3D' }}>
+          Live test scenario
+        </h2>
+        <div className="flex gap-1 rounded-[10px] p-1" style={{ background: '#E8ECF2' }}>
+          {['prevention', 'recovery'].map(tab => {
+            const active = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className="px-4 py-1 rounded-[8px] text-xs font-semibold capitalize transition-all duration-200"
+                style={{
+                  background: active ? '#FFFFFF' : 'transparent',
+                  color: active ? '#0A1F3D' : '#5B6B84',
+                  boxShadow: active ? '0 1px 4px rgba(10,31,77,0.10)' : 'none',
+                }}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            );
+          })}
         </div>
         {!hideRunButton && onRunDemo && (
           <button
             onClick={onRunDemo}
             disabled={isRunning}
-            className="inline-flex items-center justify-center gap-2 text-white px-4 py-2.5 rounded-[12px] font-semibold text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex-shrink-0"
+            className="ml-auto inline-flex items-center justify-center gap-2 text-white px-4 py-2 rounded-[10px] font-semibold text-xs transition-all active:scale-[0.98] disabled:opacity-50"
             style={{
               background: 'linear-gradient(180deg, #3B6FE8 0%, #2B5FE0 100%)',
               boxShadow: '0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 14px -6px rgba(43,95,224,0.5)',
@@ -178,34 +193,10 @@ export function ScenarioPicker({ selectedScenario, onSelectScenario, onRunDemo, 
         )}
       </div>
 
-      <div className="px-6 py-6 space-y-7" style={{ background: '#F9FBFF' }}>
-        {/* Prevention group */}
-        <div>
-          <div className="flex items-center gap-2 mb-3.5">
-            <span className="text-[10px] font-semibold" style={{ color: '#0A1F3D' }}>Prevention — Layer 1</span>
-            <div className="flex-1 h-px" style={{ background: '#E3E8F0' }} />
-            <span className="text-[10px]" style={{ color: '#8B98AC' }}>Layer 1 acts before Checkout opens</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {preventionScenarios.map(sc => (
-              <ScenarioCard key={sc.id} sc={sc} selected={selectedScenario?.id === sc.id} onClick={() => onSelectScenario(sc)} />
-            ))}
-          </div>
-        </div>
-
-        {/* Recovery group */}
-        <div>
-          <div className="flex items-center gap-2 mb-3.5">
-            <span className="text-[10px] font-semibold" style={{ color: '#3E63B0' }}>Recovery — Layer 2+3</span>
-            <div className="flex-1 h-px" style={{ background: '#E3E8F0' }} />
-            <span className="text-[10px]" style={{ color: '#8B98AC' }}>Layer 2+3 classifies & recovers after failure</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {recoveryScenarios.map(sc => (
-              <ScenarioCard key={sc.id} sc={sc} selected={selectedScenario?.id === sc.id} onClick={() => onSelectScenario(sc)} />
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {visibleScenarios.map(sc => (
+          <ScenarioCard key={sc.id} sc={sc} selected={selectedScenario?.id === sc.id} onClick={() => onSelectScenario(sc)} />
+        ))}
       </div>
     </div>
   );
@@ -248,25 +239,24 @@ function ScenarioArt({ Icon, accent }) {
 
 function ScenarioCard({ sc, selected, onClick }) {
   const Icon = sc.icon;
-  const isPrevention = sc.type === 'prevention';
-  const accentColor = isPrevention ? '#0A1F3D' : '#3E63B0';
+  const BLUE = '#2B5FE0';
 
   return (
     <button
       onClick={onClick}
-      className="group relative w-full text-left rounded-[16px] bg-white overflow-hidden flex flex-col transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_36px_-16px_rgba(10,31,77,0.32)] focus:outline-none"
+      className="group relative w-full text-left rounded-[16px] overflow-hidden flex flex-col transition-all duration-300 ease-out hover:-translate-y-1 focus:outline-none"
       style={{
-        border: selected ? `1.5px solid ${accentColor}` : '1px solid #E3E8F0',
+        background: '#F3F5F9',
         boxShadow: selected
-          ? `0 0 0 3px ${isPrevention ? 'rgba(10,31,77,0.10)' : 'rgba(62,99,176,0.14)'}, 0 12px 24px -14px rgba(10,31,77,0.22)`
-          : '0 1px 2px rgba(10,31,77,0.04), 0 6px 16px -12px rgba(10,31,77,0.16)',
+          ? `0 0 0 2px rgba(43,95,224,0.45), 0 16px 48px -8px rgba(43,95,224,0.62)`
+          : '0 2px 8px rgba(10,31,77,0.06), 0 12px 28px -10px rgba(10,31,77,0.18)',
       }}
     >
       {/* Selected check badge */}
       {selected && (
         <div
           className="absolute top-2.5 right-2.5 z-10 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: accentColor, boxShadow: '0 2px 6px rgba(10,31,77,0.35)' }}
+          style={{ background: BLUE, boxShadow: '0 2px 8px rgba(43,95,224,0.45)' }}
         >
           <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
         </div>
@@ -279,7 +269,7 @@ function ScenarioCard({ sc, selected, onClick }) {
         </div>
         <span
           className="absolute top-2.5 left-2.5 text-[9.5px] font-semibold px-2 py-1 rounded-full"
-          style={{ background: 'rgba(255,255,255,0.92)', color: accentColor, backdropFilter: 'blur(2px)' }}
+          style={{ background: 'rgba(255,255,255,0.92)', color: '#0A1F3D', backdropFilter: 'blur(2px)' }}
         >
           {sc.category}
         </span>
@@ -294,13 +284,13 @@ function ScenarioCard({ sc, selected, onClick }) {
           {sc.description.length > 92 ? sc.description.slice(0, 92).trim() + '…' : sc.description}
         </p>
 
-        <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #EEF1F6' }}>
+        <div className="mt-auto flex items-center justify-between pt-3">
           <span className="text-sm font-bold tabular-nums" style={{ color: '#0A1F3D' }}>
             ₹{sc.amount.toLocaleString('en-IN')}
           </span>
           <span
-            className="inline-flex items-center gap-1 text-[10.5px] font-semibold px-2.5 py-1.5 rounded-[8px] transition-colors"
-            style={{ color: accentColor, background: '#F6F9FE' }}
+            className="inline-flex items-center gap-1 text-[10.5px] font-semibold px-2.5 py-1.5 rounded-[8px]"
+            style={{ color: BLUE, background: 'rgba(43,95,224,0.08)' }}
           >
             Run scenario
             <ArrowRight className="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5" />

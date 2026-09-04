@@ -24,13 +24,13 @@ router.get('/summary', async (req, res) => {
 
       totalAtRisk += t.amount;
 
-      // Layer 1 Prevention
+      // Layer 1 Prevention (outcome was success via proactive action)
       if (t.outcome?.status === 'success' && t.layer1?.action && t.layer1.action !== 'PROCEED_NORMAL') {
         totalPrevented += t.amount;
       }
 
-      // Layer 2 Recovery
-      if (t.finalOutcome?.recovered) {
+      // Layer 2 Recovery — only count if outcome was actually a failure (not a Layer 1 prevention)
+      if (t.finalOutcome?.recovered && t.outcome?.status !== 'success') {
         totalRecovered += (t.finalOutcome.amountRecovered || t.amount);
       }
 
@@ -43,8 +43,13 @@ router.get('/summary', async (req, res) => {
     const totalSaved = totalPrevented + totalRecovered;
     const savedPercentage = totalAtRisk > 0 ? (totalSaved / totalAtRisk) * 100 : 0;
 
-    // Naive baseline comparison: fixed naive retry succeeds ~38% on soft declines only
-    const naiveBaselineRecovered = Math.round(totalAtRisk * 0.36);
+    // Naive baseline: 36% recovery applied only to transactions that actually failed
+    // (not to all at-risk — most transactions succeed without intervention)
+    const failedTransactions = transactions.filter(t =>
+      t.outcome?.status === 'failed' || (!t.finalOutcome?.prevented && t.outcome?.status !== 'success')
+    );
+    const failedAtRisk = failedTransactions.reduce((s, t) => s + t.amount, 0);
+    const naiveBaselineRecovered = Math.round(failedAtRisk * 0.36);
     const naivePercentage = totalAtRisk > 0 ? (naiveBaselineRecovered / totalAtRisk) * 100 : 36.0;
     const liftPercentage = savedPercentage - naivePercentage;
 
@@ -72,7 +77,7 @@ router.get('/learning-curve', async (req, res) => {
   try {
     const transactions = await Transaction.find()
       .sort({ createdAt: 1 })
-      .select('amount outcome finalOutcome isRealRazorpayCall createdAt')
+      .select('amount outcome finalOutcome layer1 layer2 isRealRazorpayCall createdAt')
       .lean();
 
     if (transactions.length === 0) {
@@ -80,30 +85,46 @@ router.get('/learning-curve', async (req, res) => {
     }
 
     const points = [];
-    let cumulativeAttempts = 0;
     let cumulativeSaved = 0;
     let cumulativeAtRisk = 0;
+    let cumulativeNaive = 0;
 
-    // Aggregate into 20-30 chart points or 10-item step intervals
     const step = Math.max(1, Math.floor(transactions.length / 30));
 
     transactions.forEach((t, idx) => {
-      cumulativeAttempts++;
       cumulativeAtRisk += t.amount;
 
-      if (t.finalOutcome?.recovered || (t.outcome?.status === 'success' && t.layer1?.action !== 'PROCEED_NORMAL')) {
+      // Unified save: L1 prevention OR L2 recovery — never both
+      const isL1Prevented = t.outcome?.status === 'success'
+        && t.layer1?.action
+        && t.layer1.action !== 'PROCEED_NORMAL';
+
+      const isL2Recovered = t.finalOutcome?.recovered
+        && t.outcome?.status !== 'success';
+
+      if (isL1Prevented || isL2Recovered) {
         cumulativeSaved += t.amount;
       }
 
+      // Naive baseline: 36% of failed transactions only
+      const isFailed = t.outcome?.status === 'failed';
+      if (isFailed) {
+        cumulativeNaive += t.amount * 0.36;
+      }
+
       if ((idx + 1) % step === 0 || idx === transactions.length - 1) {
-        const recoveryRate = cumulativeAtRisk > 0 ? (cumulativeSaved / cumulativeAtRisk) * 100 : 0;
-        // Naive baseline line for comparison
-        const naiveRate = 36 + (Math.sin(idx / 5) * 1.5);
+        const recoveryRate = cumulativeAtRisk > 0
+          ? (cumulativeSaved / cumulativeAtRisk) * 100
+          : 0;
+
+        const naiveRate = cumulativeAtRisk > 0
+          ? (cumulativeNaive / cumulativeAtRisk) * 100
+          : 0;
 
         points.push({
           sequence: idx + 1,
           recoveryRate: Number(recoveryRate.toFixed(1)),
-          naiveRate: Number(naiveRate.toFixed(1)),
+          naiveRate: Number(Math.max(naiveRate, 0).toFixed(1)),
           totalSaved: cumulativeSaved,
           totalAtRisk: cumulativeAtRisk
         });

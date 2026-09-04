@@ -8,6 +8,7 @@
     "client": "cd client && npm run dev",
     "start": "cd server && npm start",
     "build": "cd client && npm run build",
+    "render-build": "npm install && cd server && npm install && cd ../client && npm install && npm run build",
     "test": "cd server && npm test",
     "test:razorpay": "cd server && npm run test:razorpay"
   },
@@ -18,7 +19,7 @@
     "contextual-bandit",
     "fintech"
   ],
-  "author": "Antigravity",
+  "author": "AI Recovery Agent",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.1.2"

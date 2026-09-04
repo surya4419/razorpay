@@ -16,7 +16,7 @@ router.get('/state', async (req, res) => {
       const defaultState = catStates.find(s => s.action === meta.defaultAction);
       const defaultRate = defaultState ? defaultState.winRate : 0.55;
 
-      const nonDefaults = catStates.filter(s => s.action !== meta.defaultAction && s.attempts >= 5);
+      const nonDefaults = catStates.filter(s => s.action !== meta.defaultAction && s.attempts >= 2);
       for (const nd of nonDefaults) {
         if (nd.winRate > defaultRate) {
           divergences.push({

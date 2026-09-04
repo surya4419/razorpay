@@ -58,16 +58,16 @@ export async function runBatchSimulation({
           transactionType: synthetic.transactionType
         });
 
-        // Prevention calculation: Did Layer 1 avert the failure?
+        // Prevention calculation: realistic Layer 1 prevention rates
         let isPrevented = false;
         if (layer1Decision.action === 'PRECOLLECT_AFA' && synthetic.transactionType === 'recurring' && synthetic.amount > 15000) {
-          isPrevented = true; // Deterministic AFA pre-collection saves the doomed silent auto-debit!
-        } else if (layer1Decision.action === 'REORDER_METHODS' && Math.random() < 0.35) {
-          isPrevented = true; // Method reordering guided customer to their highest-converting rail
-        } else if (layer1Decision.action === 'TIME_AWARE_ROUTE' && Math.random() < 0.28) {
-          isPrevented = true; // Route switch avoided peak-hour bank gateway congestion
-        } else if (layer1Decision.action === 'EXTEND_SESSION' && Math.random() < 0.25) {
-          isPrevented = true; // Extended session prevented checkout timeout drop-off
+          isPrevented = true; // Deterministic — RBI AFA always saves this
+        } else if (layer1Decision.action === 'REORDER_METHODS' && Math.random() < 0.20) {
+          isPrevented = true;
+        } else if (layer1Decision.action === 'TIME_AWARE_ROUTE' && Math.random() < 0.16) {
+          isPrevented = true;
+        } else if (layer1Decision.action === 'EXTEND_SESSION' && Math.random() < 0.14) {
+          isPrevented = true;
         }
 
         const transaction = new Transaction({
@@ -90,7 +90,8 @@ export async function runBatchSimulation({
         if (isPrevented) {
           transaction.outcome = { status: 'success', timestamp: new Date() };
           transaction.finalOutcome = {
-            recovered: true,
+            prevented: true,       // Layer 1 prevention — NOT counted as Layer 2 recovery
+            recovered: false,
             amountRecovered: synthetic.amount,
             timestamp: new Date()
           };
@@ -164,13 +165,12 @@ export async function runBatchSimulation({
             activeSimulation.stats.restraintCount += 1;
           }
 
-          // Compute recovery success probability (Bandit learns optimal actions!)
+          // Compute recovery success probability — realistic L2 recovery rates
           let recovered = false;
           if (restraintResult.allowed) {
-            // High probability when choosing appropriate action vs naive retry
-            const baseRecoveryChance = classification.category.startsWith('HARD_') ? 0.40 : 0.72;
-            const actionBonus = banditDecision.action.includes('PAYMENT_LINK') || banditDecision.action.includes('RETRY') ? 0.15 : 0.05;
-            recovered = Math.random() < Math.min(0.92, baseRecoveryChance + actionBonus);
+            const baseRecoveryChance = classification.category.startsWith('HARD_') ? 0.15 : 0.42;
+            const actionBonus = banditDecision.action.includes('PAYMENT_LINK') ? 0.07 : 0.02;
+            recovered = Math.random() < Math.min(0.52, baseRecoveryChance + actionBonus);
           }
 
           // Naive baseline benchmark (fixed retry everything blindly: ~38% success)

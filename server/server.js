@@ -2,6 +2,8 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
 import { connectDB } from './config/db.js';
 import { seedDatabase } from './config/seed.js';
@@ -16,6 +18,9 @@ import banditRoutes from './routes/bandit.js';
 import rulesRoutes from './routes/rules.js';
 import playgroundRoutes from './routes/playground.js';
 import { handleWebhookEvent } from './webhooks/receiver.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -37,7 +42,7 @@ app.use(bodyParser.json({
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Inbound Webhook Route (Secondary/Optional Path with Deduplication)
+// Inbound Webhook Route
 app.post('/webhooks/razorpay', handleWebhookEvent);
 
 // API Routes
@@ -49,7 +54,7 @@ app.use('/api/metrics', metricsRoutes);
 app.use('/api/bandit', banditRoutes);
 app.use('/api/risk-rules', rulesRoutes);
 
-// Health check route
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -57,6 +62,13 @@ app.get('/api/health', (req, res) => {
     razorpayConfigured: config.isRealRazorpayConfigured,
     keyId: config.razorpayKeyId
   });
+});
+
+// Serve React build in production
+const clientBuildPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientBuildPath));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 // Start Server

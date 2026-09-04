@@ -70,13 +70,8 @@ export function Navbar({ activeTab, onTabChange, config }) {
 
           {/* Right status tag */}
           <div className="w-[160px] flex justify-end">
-            <span
-              className="hidden sm:inline-flex items-center gap-1.5 text-[11.5px] font-medium px-2.5 py-1 rounded-full"
-              style={{ background: '#E8F0FD', color: '#2B5FE0' }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#2B5FE0' }} />
-              Live
-            </span>
+           
+             
           </div>
         </div>
       </div>

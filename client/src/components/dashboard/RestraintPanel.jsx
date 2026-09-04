@@ -8,7 +8,8 @@ import { StatusPill } from '../shared/StatusPill.jsx';
  * Ice #F6F9FE · Line #E3E8F0 · Radius: 20 (card) / 12 (inner panels)
  */
 
-const CARD_SHADOW = '0 1px 1px rgba(10,31,77,0.03), 0 12px 28px -16px rgba(10,31,77,0.22)';
+const CARD_SHADOW = '0 2px 4px rgba(10,31,77,0.06), 0 16px 40px -12px rgba(10,31,77,0.28)';
+const CARD_HOVER_SHADOW = '0 2px 4px rgba(10,31,77,0.08), 0 28px 52px -12px rgba(10,31,77,0.36)';
 
 export function RestraintPanel({ restraintData, onSelectTransaction }) {
   const cases = restraintData?.cases || [];
@@ -16,14 +17,13 @@ export function RestraintPanel({ restraintData, onSelectTransaction }) {
 
   return (
     <div
-      className="rounded-[20px] bg-white overflow-hidden"
-      style={{ border: '1px solid #E3E8F0', boxShadow: CARD_SHADOW }}
+      className="rounded-[20px] overflow-hidden transition-all duration-300 ease-out hover:-translate-y-0.5"
+      style={{ background: '#F3F5F9', boxShadow: CARD_SHADOW }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = CARD_HOVER_SHADOW; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = CARD_SHADOW; }}
     >
       {/* Header */}
-      <div
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-5"
-        style={{ borderBottom: '1px solid #E3E8F0' }}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-5">
         <div className="flex items-center gap-3">
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
@@ -68,7 +68,7 @@ export function RestraintPanel({ restraintData, onSelectTransaction }) {
             <div
               key={pillar.title}
               className="rounded-[12px] p-3.5"
-              style={{ border: '1px solid #E3E8F0', background: '#F6F9FE' }}
+              style={{ background: 'rgba(10,31,77,0.04)', borderRadius: 12 }}
             >
               <div className="text-xs font-semibold mb-1" style={{ color: '#0A1F3D' }}>{pillar.title}</div>
               <p className="text-[11px] leading-relaxed" style={{ color: '#5B6B84' }}>{pillar.body}</p>
@@ -85,9 +85,9 @@ export function RestraintPanel({ restraintData, onSelectTransaction }) {
               key={t._id || idx}
               onClick={() => onSelectTransaction?.(t._id)}
               className="p-3.5 rounded-[12px] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs cursor-pointer transition-colors duration-150"
-              style={{ border: '1px solid #E3E8F0', background: '#FBFCFE' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#F6F9FE'; e.currentTarget.style.borderColor = 'rgba(43,95,224,0.18)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#FBFCFE'; e.currentTarget.style.borderColor = '#E3E8F0'; }}
+              style={{ background: 'rgba(10,31,77,0.03)', borderRadius: 12 }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(43,95,224,0.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(10,31,77,0.03)'; }}
             >
               <div>
                 <div className="flex items-center gap-2 font-medium" style={{ color: '#0A1F3D' }}>

@@ -9,7 +9,8 @@ import { Search, Eye, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-reac
  * Ice #F6F9FE · Line #E3E8F0 · Radius: 20 (card) / 10 (inputs)
  */
 
-const CARD_SHADOW = '0 1px 1px rgba(10,31,77,0.03), 0 12px 28px -16px rgba(10,31,77,0.22)';
+const CARD_SHADOW = '0 2px 4px rgba(10,31,77,0.06), 0 16px 40px -12px rgba(10,31,77,0.28)';
+const CARD_HOVER_SHADOW = '0 2px 4px rgba(10,31,77,0.08), 0 28px 52px -12px rgba(10,31,77,0.36)';
 
 const inputBase = {
   background: '#FFFFFF',
@@ -37,24 +38,13 @@ export function AuditTable({
 }) {
   return (
     <div
-      className="rounded-[20px] bg-white overflow-hidden"
-      style={{ border: '1px solid #E3E8F0', boxShadow: CARD_SHADOW }}
+      className="rounded-[20px] overflow-hidden"
+      style={{ background: '#F3F5F9', boxShadow: CARD_SHADOW }}
     >
       {/* Header */}
-      <div
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-6 py-5"
-        style={{ borderBottom: '1px solid #E3E8F0' }}
-      >
-        <div>
-          <h3 className="text-[15px] font-semibold" style={{ color: '#0A1F3D' }}>
-            Audit drill-down & transaction ledger
-          </h3>
-          <p className="text-xs mt-0.5" style={{ color: '#5B6B84' }}>
-            {total} total records. Click any row to inspect the full decision journey and raw payloads.
-          </p>
-        </div>
-
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-6 py-4">
         <div className="flex flex-wrap items-center gap-2.5">
+          <span className="text-xs font-medium" style={{ color: '#8B98AC' }}>{total} records</span>
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#8B98AC' }} />
             <input
@@ -98,9 +88,9 @@ export function AuditTable({
 
       {/* Table */}
       <div className="px-6 py-4">
-        <div className="overflow-x-auto rounded-[12px]" style={{ border: '1px solid #E3E8F0' }}>
+        <div className="overflow-x-auto rounded-[12px]" style={{ background: 'rgba(10,31,77,0.04)' }}>
           <table className="w-full text-left text-xs">
-            <thead style={{ background: '#F6F9FE', borderBottom: '1px solid #E3E8F0' }}>
+            <thead style={{ background: 'rgba(10,31,77,0.06)' }}>
               <tr>
                 {['Source', 'Customer / Order', 'Amount', 'Method', 'Layer 1 Action', 'Layer 2 Diagnosis & Recovery', 'Outcome', 'Inspect'].map((h, i) => (
                   <th
@@ -128,8 +118,8 @@ export function AuditTable({
                       key={t._id}
                       onClick={() => onSelectTransaction(t._id)}
                       className="cursor-pointer transition-colors duration-150"
-                      style={{ borderBottom: '1px solid #E3E8F0' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#F6F9FE'; }}
+                      style={{ borderBottom: 'none' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(43,95,224,0.06)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                     >
                       <td className="px-3.5 py-3 whitespace-nowrap">
@@ -195,10 +185,7 @@ export function AuditTable({
       </div>
 
       {/* Pagination */}
-      <div
-        className="flex items-center justify-between text-xs px-6 py-4"
-        style={{ borderTop: '1px solid #E3E8F0', color: '#8B98AC' }}
-      >
+      <div className="flex items-center justify-between text-xs px-6 py-4" style={{ color: '#8B98AC' }}>
         <div>
           Showing page{' '}
           <span className="font-semibold" style={{ color: '#0A1F3D' }}>{page}</span> of{' '}

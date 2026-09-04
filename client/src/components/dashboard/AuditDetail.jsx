@@ -44,13 +44,13 @@ export function AuditDetail({ transactionId, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" style={{ background: 'rgba(10,31,77,0.35)', backdropFilter: 'blur(2px)' }}>
       <div
-        className="bg-white w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
-        style={{ borderRadius: 20, border: '1px solid #E3E8F0', boxShadow: '0 4px 6px rgba(10,31,77,0.04), 0 24px 48px -16px rgba(10,31,77,0.28)' }}
+        className="w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
+        style={{ borderRadius: 20, background: '#F3F5F9', boxShadow: '0 4px 6px rgba(10,31,77,0.04), 0 24px 48px -16px rgba(10,31,77,0.28)' }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-6 py-5 flex-shrink-0"
-          style={{ borderBottom: '1px solid #E3E8F0', background: 'linear-gradient(180deg, #FBFDFF 0%, #FFFFFF 100%)' }}
+          style={{ borderBottom: 'none', background: 'transparent' }}
         >
           <div>
             <div className="flex items-center gap-2 mb-0.5">
@@ -86,7 +86,7 @@ export function AuditDetail({ transactionId, onClose }) {
               {/* Summary grid */}
               <div
                 className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-[14px]"
-                style={{ background: '#F6F9FE', border: '1px solid #E3E8F0' }}
+                style={{ background: 'rgba(10,31,77,0.04)', borderRadius: 14 }}
               >
                 <div>
                   <span className="text-[11px] block mb-0.5" style={{ color: '#8B98AC' }}>Amount</span>
@@ -150,7 +150,7 @@ export function AuditDetail({ transactionId, onClose }) {
               {t.layer2?.category && (
                 <div
                   className="rounded-[14px] p-4 space-y-2"
-                  style={{ border: '1px solid #E3E8F0', background: '#F6F9FE' }}
+                  style={{ background: 'rgba(10,31,77,0.04)' }}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-semibold flex items-center gap-1.5" style={{ color: '#0A1F3D' }}>
@@ -217,7 +217,7 @@ export function AuditDetail({ transactionId, onClose }) {
                       <div
                         key={idx}
                         className="p-3 rounded-[10px] flex items-start gap-2.5"
-                        style={{ background: '#F6F9FE', border: '1px solid #E3E8F0' }}
+                        style={{ background: 'rgba(10,31,77,0.04)', borderRadius: 10 }}
                       >
                         <Clock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: '#8B98AC' }} />
                         <div>
@@ -238,7 +238,7 @@ export function AuditDetail({ transactionId, onClose }) {
         {/* Footer */}
         <div
           className="px-6 py-4 flex items-center justify-between flex-shrink-0"
-          style={{ borderTop: '1px solid #E3E8F0', background: '#FBFCFE' }}
+          style={{ background: 'transparent' }}
         >
           <span className="text-[11px]" style={{ color: '#8B98AC' }}>Traceable audit ledger</span>
           <button

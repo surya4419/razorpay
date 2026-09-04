@@ -15,7 +15,7 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#1A2332] flex flex-col selection:bg-[#14304D]/15 selection:text-[#14304D]">
+    <div className="min-h-screen bg-[#E2E4E9] text-[#1A2332] flex flex-col selection:bg-[#14304D]/15 selection:text-[#14304D]">
       {/* Top Persistent Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -36,7 +36,7 @@ export function App() {
 
       {/* Quiet Footer */}
       <footer className="border-t border-[#E2E5EB] bg-white py-4 text-center text-xs text-[#6B7280] font-sans">
-        Razorpay Buildathon 2026 • Track 03: AI Revenue Recovery • Powered by Razorpay Test Mode
+        Stop losing revenue to payment failures — recover smarter, not harder. &nbsp;·&nbsp; © 2026 AI Recovery Agent
       </footer>
     </div>
   );

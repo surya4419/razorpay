@@ -10,24 +10,16 @@ import { api } from '../../services/api.js';
 import { useSocket } from '../../hooks/useSocket.js';
 import { LayoutDashboard, Cpu } from 'lucide-react';
 
-/**
- * Design tokens (matches playground system):
- * Ink #0A1F3D · Primary #2B5FE0 · Slate #5B6B84
- * Ice #F6F9FE · Line #E3E8F0 · Radius: 20 (cards) / 12 (controls) / full (pills)
- */
-
 export function DashboardTab() {
   const [metrics, setMetrics] = useState(null);
   const [chartData, setChartData] = useState(null);
   const [divergences, setDivergences] = useState([]);
   const [transactionsData, setTransactionsData] = useState({ transactions: [], total: 0 });
-
   const [page, setPage] = useState(1);
   const [filterRealOnly, setFilterRealOnly] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
-
   const [isSimulating, setIsSimulating] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState('overview');
 
@@ -44,8 +36,8 @@ export function DashboardTab() {
           limit: 50,
           isRealRazorpayCall: filterRealOnly ? 'true' : undefined,
           status: statusFilter || undefined,
-          search: searchQuery || undefined
-        })
+          search: searchQuery || undefined,
+        }),
       ]);
       setMetrics(summaryRes);
       setChartData(chartRes);
@@ -79,77 +71,100 @@ export function DashboardTab() {
   };
 
   return (
-    <div className="space-y-6" style={{ background: '#FBFCFE' }}>
+    <div className="space-y-8">
       {/* Sub-navigation */}
-      <div
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-1.5 rounded-[14px]"
-        style={{ border: '1px solid #E3E8F0', boxShadow: '0 1px 1px rgba(10,31,77,0.03), 0 4px 12px -8px rgba(10,31,77,0.12)' }}
-      >
-        <div className="flex items-center gap-1.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 rounded-[12px] p-1" style={{ background: '#E8ECF2' }}>
           <button
             onClick={() => setActiveSubTab('overview')}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] text-xs font-semibold transition-all"
-            style={
-              activeSubTab === 'overview'
-                ? { background: 'linear-gradient(180deg, #16305A 0%, #0A1F3D 100%)', color: '#FFFFFF', boxShadow: '0 1px 0 rgba(255,255,255,0.1) inset, 0 4px 10px -4px rgba(10,31,77,0.5)' }
-                : { color: '#5B6B84', background: 'transparent' }
-            }
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[9px] text-xs font-semibold transition-all"
+            style={activeSubTab === 'overview'
+              ? { background: '#FFFFFF', color: '#0A1F3D', boxShadow: '0 1px 4px rgba(10,31,77,0.10)' }
+              : { color: '#5B6B84', background: 'transparent' }}
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
             <span>Overview & analytics</span>
           </button>
-
           <button
             onClick={() => setActiveSubTab('bandit_inspect')}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] text-xs font-semibold transition-all"
-            style={
-              activeSubTab === 'bandit_inspect'
-                ? { background: 'linear-gradient(180deg, #16305A 0%, #0A1F3D 100%)', color: '#FFFFFF', boxShadow: '0 1px 0 rgba(255,255,255,0.1) inset, 0 4px 10px -4px rgba(10,31,77,0.5)' }
-                : { color: '#5B6B84', background: 'transparent' }
-            }
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[9px] text-xs font-semibold transition-all"
+            style={activeSubTab === 'bandit_inspect'
+              ? { background: '#FFFFFF', color: '#0A1F3D', boxShadow: '0 1px 4px rgba(10,31,77,0.10)' }
+              : { color: '#5B6B84', background: 'transparent' }}
           >
             <Cpu className="w-3.5 h-3.5" />
             <span>Bandit & rules under the hood</span>
           </button>
         </div>
-
-        <span className="text-[11px] font-mono hidden sm:block pr-3" style={{ color: '#8B98AC' }}>
+        <span className="text-[11px] font-mono hidden sm:block" style={{ color: '#8B98AC' }}>
           Combined real + simulated dataset
         </span>
       </div>
 
       {activeSubTab === 'overview' ? (
-        <>
-          <HeadlineMetrics metrics={metrics} />
-          <ControlPanel
-            onRunSimulation={handleRunSimulation}
-            isSimulating={isSimulating}
-            progress={simulationProgress}
-            onRefresh={refreshDashboardData}
-          />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-            <div className="lg:col-span-2">
+        /* Single unified surface */
+        <div
+          className="rounded-[24px] overflow-hidden"
+          style={{
+            background: '#F3F5F9',
+            boxShadow: '0 2px 4px rgba(10,31,77,0.06), 0 16px 40px -12px rgba(10,31,77,0.28)',
+          }}
+        >
+          {/* Hero metrics */}
+          <div className="px-8 pt-8 pb-6">
+            <HeadlineMetrics metrics={metrics} />
+          </div>
+
+          <div className="mx-6" style={{ height: 1, background: 'rgba(10,31,77,0.07)' }} />
+
+          {/* Simulation controls */}
+          <div className="px-6 pt-5 pb-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold" style={{ color: '#0A1F3D' }}>Analytics & simulation</h2>
+              <span className="text-[11px]" style={{ color: '#8B98AC' }}>Live streaming pipeline</span>
+            </div>
+            <ControlPanel
+              onRunSimulation={handleRunSimulation}
+              isSimulating={isSimulating}
+              progress={simulationProgress}
+              onRefresh={refreshDashboardData}
+            />
+          </div>
+
+          {/* Chart + live feed — items-start so feed doesn't over-stretch */}
+          <div className="px-4 pb-4 grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+            <div className="lg:col-span-2 rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', boxShadow: '0 1px 3px rgba(10,31,77,0.06), 0 8px 24px -8px rgba(10,31,77,0.16)' }}>
               <LearningCurveChart chartData={chartData} divergences={divergences} />
             </div>
-            <div className="flex flex-col">
+            <div className="rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', boxShadow: '0 1px 3px rgba(10,31,77,0.06), 0 8px 24px -8px rgba(10,31,77,0.16)' }}>
               <LiveFeed events={events} onSelectTransaction={setSelectedTransactionId} />
             </div>
           </div>
 
-          <AuditTable
-            transactions={transactionsData.transactions}
-            total={transactionsData.total}
-            page={page}
-            onPageChange={setPage}
-            filterRealOnly={filterRealOnly}
-            onToggleRealOnly={() => setFilterRealOnly(!filterRealOnly)}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onSelectTransaction={setSelectedTransactionId}
-          />
-        </>
+          <div className="mx-6" style={{ height: 1, background: 'rgba(10,31,77,0.07)' }} />
+
+          {/* Transaction ledger */}
+          <div className="px-6 pt-4 pb-6">
+            <p className="text-xs font-semibold mb-3 uppercase tracking-widest" style={{ color: '#8B98AC' }}>
+              Transaction ledger
+            </p>
+            <div style={{ maxHeight: '480px', overflowY: 'auto' }}>
+              <AuditTable
+                transactions={transactionsData.transactions}
+                total={transactionsData.total}
+                page={page}
+                onPageChange={setPage}
+                filterRealOnly={filterRealOnly}
+                onToggleRealOnly={() => setFilterRealOnly(!filterRealOnly)}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onSelectTransaction={setSelectedTransactionId}
+              />
+            </div>
+          </div>
+        </div>
       ) : (
         <BanditUnderTheHood />
       )}
