@@ -14,6 +14,7 @@ export const api = {
   resolvePayment: (data) => client.post('/playground/resolve-payment', data).then(r => r.data),
   attemptEmandateCharge: () => client.post('/playground/attempt-emandate-charge').then(r => r.data),
   sendAfaAuthLink: (data) => client.post('/playground/send-afa-auth-link', data).then(r => r.data),
+  confirmAfaComplete: (transactionId) => client.post('/playground/confirm-afa-complete', { transactionId }).then(r => r.data),
   retryOrder: (data) => client.post('/playground/retry-order', data).then(r => r.data),
   simulateLinkPaid: (transactionId) => client.post('/playground/simulate-link-paid', { transactionId }).then(r => r.data),
 

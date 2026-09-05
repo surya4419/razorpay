@@ -107,11 +107,26 @@ export function AuditTable({
               {transactions.length > 0 ? (
                 transactions.map((t) => {
                   const isReal = t.isRealRazorpayCall;
-                  const status = t.finalOutcome?.recovered
-                    ? 'recovered'
-                    : (t.outcome?.status === 'success' && t.layer1?.action !== 'PROCEED_NORMAL'
-                      ? 'prevented'
-                      : (t.layer2?.restraint ? 'restrained' : (t.outcome?.status === 'success' ? 'success' : 'lost')));
+
+                  // Derive display status correctly across all 6 scenarios
+                  let status;
+                  const isL2Recovery = t.finalOutcome?.recovered && t.layer2?.category;
+                  const isL1Prevention = t.outcome?.status === 'success'
+                    && t.layer1?.action
+                    && t.layer1.action !== 'PROCEED_NORMAL'
+                    && !isL2Recovery;
+
+                  if (isL1Prevention) {
+                    status = 'prevented';
+                  } else if (isL2Recovery) {
+                    status = 'recovered';
+                  } else if (t.layer2?.restraint) {
+                    status = 'restrained';
+                  } else if (t.outcome?.status === 'success') {
+                    status = 'success';
+                  } else {
+                    status = 'lost';
+                  }
 
                   return (
                     <tr

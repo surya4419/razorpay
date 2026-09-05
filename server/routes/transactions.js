@@ -25,13 +25,17 @@ router.get('/', async (req, res) => {
 
     if (status) {
       if (status === 'prevented') {
+        // Layer 1 prevention: succeeded with a non-normal Layer 1 action, no Layer 2 needed
         query['outcome.status'] = 'success';
-        query['layer1.action'] = { $ne: 'PROCEED_NORMAL' };
+        query['layer1.action'] = { $nin: ['PROCEED_NORMAL', null, undefined] };
+        query['layer2.category'] = { $exists: false };
       } else if (status === 'recovered') {
-        query['finalOutcome.recovered'] = true;
+        // Layer 2 recovery: layer2 ran (has category) and either recovered or attempted recovery
+        query['layer2.category'] = { $exists: true, $ne: null };
+        query['layer2.restraint'] = { $ne: true };
       } else if (status === 'failed' || status === 'lost') {
         query['outcome.status'] = 'failed';
-        query['finalOutcome.recovered'] = false;
+        query['finalOutcome.recovered'] = { $ne: true };
       }
     }
 

@@ -309,7 +309,7 @@ export function usePaneStateMachine({ scenario, pane }) {
   // -------------------------------------------------------------------------
   // STEP 2d: Mark AFA as complete (user clicked "Mark OTP complete")
   // -------------------------------------------------------------------------
-  const markAfaComplete = useCallback(() => {
+  const markAfaComplete = useCallback(async () => {
     setAfaComplete(true);
     const successTxn = {
       ...(transactionRef.current || {}),
@@ -323,6 +323,16 @@ export function usePaneStateMachine({ scenario, pane }) {
     transactionRef.current = successTxn;
     setState('RESOLVED');
     setPaymentResult({ status: 'success', source: 'afa_authentication' });
+
+    // Persist to DB so ledger shows correctly as Prevented (Layer 1)
+    const txnId = orderDataRef.current?.transactionId || transactionRef.current?._id;
+    if (txnId) {
+      try {
+        await api.confirmAfaComplete(txnId);
+      } catch (e) {
+        // Non-blocking — UI already resolved
+      }
+    }
   }, []);
 
   // -------------------------------------------------------------------------

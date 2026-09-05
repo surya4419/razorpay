@@ -24,13 +24,17 @@ router.get('/summary', async (req, res) => {
 
       totalAtRisk += t.amount;
 
-      // Layer 1 Prevention (outcome was success via proactive action)
+      // Layer 1 Prevention — only count genuine Layer 1 interventions
       if (t.outcome?.status === 'success' && t.layer1?.action && t.layer1.action !== 'PROCEED_NORMAL') {
         totalPrevented += t.amount;
       }
 
-      // Layer 2 Recovery — only count if outcome was actually a failure (not a Layer 1 prevention)
+      // Layer 2 Recovery — failed payment subsequently recovered (including silent reconciliation)
       if (t.finalOutcome?.recovered && t.outcome?.status !== 'success') {
+        totalRecovered += (t.finalOutcome.amountRecovered || t.amount);
+      }
+      // Silent recovery: outcome was flipped to success but layer2 ran and recovered
+      if (t.finalOutcome?.recovered && t.outcome?.status === 'success' && t.layer2?.category) {
         totalRecovered += (t.finalOutcome.amountRecovered || t.amount);
       }
 
@@ -43,12 +47,10 @@ router.get('/summary', async (req, res) => {
     const totalSaved = totalPrevented + totalRecovered;
     const savedPercentage = totalAtRisk > 0 ? (totalSaved / totalAtRisk) * 100 : 0;
 
-    // Naive baseline: 36% recovery applied only to transactions that actually failed
-    // (not to all at-risk — most transactions succeed without intervention)
-    const failedTransactions = transactions.filter(t =>
-      t.outcome?.status === 'failed' || (!t.finalOutcome?.prevented && t.outcome?.status !== 'success')
-    );
-    const failedAtRisk = failedTransactions.reduce((s, t) => s + t.amount, 0);
+    // Naive baseline: 36% applied only to transactions that actually failed
+    const failedAtRisk = transactions
+      .filter(t => t.outcome?.status === 'failed')
+      .reduce((s, t) => s + t.amount, 0);
     const naiveBaselineRecovered = Math.round(failedAtRisk * 0.36);
     const naivePercentage = totalAtRisk > 0 ? (naiveBaselineRecovered / totalAtRisk) * 100 : 36.0;
     const liftPercentage = savedPercentage - naivePercentage;
@@ -94,19 +96,20 @@ router.get('/learning-curve', async (req, res) => {
     transactions.forEach((t, idx) => {
       cumulativeAtRisk += t.amount;
 
-      // Unified save: L1 prevention OR L2 recovery — never both
+      // Unified save: L1 prevention OR L2 recovery (including silent reconciliation)
       const isL1Prevented = t.outcome?.status === 'success'
         && t.layer1?.action
-        && t.layer1.action !== 'PROCEED_NORMAL';
+        && t.layer1.action !== 'PROCEED_NORMAL'
+        && !t.layer2?.category; // not a silent recovery
 
       const isL2Recovered = t.finalOutcome?.recovered
-        && t.outcome?.status !== 'success';
+        && t.layer2?.category; // has layer2 classification = genuine recovery
 
       if (isL1Prevented || isL2Recovered) {
         cumulativeSaved += t.amount;
       }
 
-      // Naive baseline: 36% of failed transactions only
+      // Naive baseline: 36% of genuinely failed transactions only
       const isFailed = t.outcome?.status === 'failed';
       if (isFailed) {
         cumulativeNaive += t.amount * 0.36;

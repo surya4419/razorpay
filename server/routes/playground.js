@@ -629,6 +629,26 @@ router.post('/send-afa-auth-link', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /api/playground/confirm-afa-complete
+// Right pane, e-mandate — marks transaction as prevented/success after AFA completion
+// ---------------------------------------------------------------------------
+router.post('/confirm-afa-complete', async (req, res) => {
+  try {
+    const { transactionId } = req.body;
+    const transaction = await Transaction.findById(transactionId);
+    if (!transaction) return res.status(404).json({ error: 'Transaction not found' });
+
+    transaction.outcome = { status: 'success', source: 'afa_authentication', timestamp: new Date() };
+    transaction.finalOutcome = { prevented: true, recovered: false, amountRecovered: 0, timestamp: new Date() };
+    await transaction.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // POST /api/playground/retry-order
 // Scenario 2 (payment timeout) — creates a second real order for automatic retry
 // ---------------------------------------------------------------------------
@@ -686,10 +706,14 @@ router.post('/simulate-link-paid', async (req, res) => {
     const transaction = await Transaction.findById(transactionId);
     if (!transaction) return res.status(404).json({ error: 'Transaction not found' });
 
-    transaction.finalOutcome = { recovered: true, amountRecovered: transaction.amount, timestamp: new Date() };
-    await transaction.save();
+    // Only mark as recovered if this transaction went through Layer 2 (has category)
+    // "Without system" pane transactions should not be marked as recovered
+    if (transaction.layer2?.category) {
+      transaction.finalOutcome = { recovered: true, amountRecovered: transaction.amount, timestamp: new Date() };
+      await transaction.save();
+    }
 
-    res.json({ success: true, recovered: true, amountRecovered: transaction.amount });
+    res.json({ success: true, recovered: Boolean(transaction.layer2?.category), amountRecovered: transaction.amount });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
